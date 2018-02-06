@@ -6,11 +6,9 @@ function displayStatus () {
   let status;
 
   if (!accessToken) {
-    status = 'There is no access token present in local storage, meaning that you are not logged in. <a href="#" onclick="checkSession()">Click here to attempt an SSO login</a>';
-  } else if (isExpired) {
-    status = 'There is an expired access token in local storage. <a href="#" onclick="checkSession()">Click here to renew it</a>';
+    status = 'There is no access token present in local storage, meaning that you are not logged in.';
   } else {
-    status = `There is an access token in local storage, and it expires on ${expirationDate}. <a href="#" onclick="checkSession()">Click here to renew it</a>`;
+    status = 'There is an access token in local storage. <a href="#" onclick="checkSession()">Click to see if you also have a SSO Session</a>';
   }
   $('#status').html(status);
 
@@ -29,6 +27,10 @@ function getAccessToken () {
   return localStorage.getItem('accessToken');
 }
 
+function getIdToken () {
+  return localStorage.getItem('idToken');
+}
+
 function saveAuthResult (result) {
   localStorage.setItem('accessToken', result.accessToken);
   localStorage.setItem('idToken', result.idToken);
@@ -37,43 +39,31 @@ function saveAuthResult (result) {
 }
 
 function checkSession () {
-  auth0WebAuth.checkSession({
-    responseType: 'token id_token',
-    timeout: 5000,
-    usePostMessage: true
-  }, function (err, result) {
-    if (err) {
-      alert(`Could not get a new token using silent authentication (${err.error}). Opening login page...`);
+  auth0.getSSOData(function (err, ssoData) {
+    if (!(ssoData && ssoData.sso === true)) {
+      alert(`NO SSO Session exists!`);
       $('#app').hide();
       $('#logout').hide();
       $('#login').show();
     } else {
-      saveAuthResult(result);
+      alert(`SSO Session exists!`);
     }
   });
 }
 
 $(function () {
-  $('#authenticate-centralised').on('click', function (e) {
-    e.preventDefault();
-    $('#embedded-login-customui').hide();
-    $('#app').hide();
-    auth0WebAuth.authorize();
-  });
-
   $('#authenticate-embedded-customui').on('click', function (e) {
     e.preventDefault();
     $('#app').hide();
     $('#embedded-login-customui').show();
           // do the authentication
     $('#signin-db').on('click', function () {
-      auth0WebAuth.login({
-        realm: AUTH0_CONNECTION,
+      auth0.login({
+        connection: AUTH0_CONNECTION,
         username: $('#email').val(),
         password: $('#password').val(),
-        redirectUri: AUTH0_CALLBACK_URL,
         sso: true,
-        scope: SCOPE
+        audience: AUDIENCE
       }, function (err) {
         // this only gets called if there was a login error
         console.error('Portal LoginController Error: ' + err);
@@ -84,7 +74,7 @@ $(function () {
   $('#sso-logout').click(function (e) {
     e.preventDefault();
     localStorage.clear();
-    auth0WebAuth.logout({ returnTo: 'http://app1.com:3000' });
+    auth0.logout({ returnTo: 'http://app1.com:3000' });
   });
 
   $('#local-logout').click(function (e) {
@@ -93,23 +83,11 @@ $(function () {
     location.href = '/';
   });
 
-  $('#get-profile').on('click', function (e) {
-    e.preventDefault();
-    $.ajax({
-      url: `https://${AUTH0_DOMAIN}/userinfo`,
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + getAccessToken() },
-      success: function (data) {
-        $('#results pre').text(JSON.stringify(data, null, 2));
-      }
-    });
-  });
-
   $('#get-profile-authentication-userinfo').on('click', function (e) {
     e.preventDefault();
-    auth0Authentication.userInfo(getAccessToken(), (err, usrInfo) => {
+    auth0.getProfile(getIdToken(), function (err, usrInfo) {
       if (err) {
-            // handle error
+        // handle error
         console.error('Failed to get userInfo');
         return;
       }
@@ -117,63 +95,13 @@ $(function () {
     });
   });
 
-  $('#get-profile-managementapi').on('click', function (e) {
-    e.preventDefault();
-    auth0WebAuth.checkSession({
-      audience: `https://${AUTH0_DOMAIN}/api/v2/`,
-      scope: 'read:current_user'
-    },
-          function (err, result) {
-            if (!err) {
-              var auth0Manage = new auth0.Management({
-                domain: AUTH0_DOMAIN,
-                token: result.accessToken
-              });
-              auth0Manage.getUser(result.idTokenPayload.sub, function (err, usrInfo) {
-                if (!err) {
-                  // use userInfo
-                  $('#results pre').text(JSON.stringify(usrInfo, null, 2));
-                } else {
-                  // handle error
-                }
-              });
-            } else {
-                // handle error
-            }
-          }
-        );
-  });
-
-  $('#get-contacts').on('click', function (e) {
-    e.preventDefault();
-    $.ajax({
-      url: `http://localhost:${CONTACTS_API_PORT}/api/contacts`,
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + getAccessToken() },
-      success: function (data) {
-        $('#results pre').text(JSON.stringify(data, null, 2));
-      }
-    });
-  });
-
-  $('#get-appointments').on('click', function (e) {
-    e.preventDefault();
-    $.ajax({
-      url: `http://localhost:${CALENDAR_API_PORT}/api/appointments`,
-      method: 'GET',
-      headers: { 'Authorization': 'Bearer ' + getAccessToken() },
-      success: function (data) {
-        $('#results pre').text(JSON.stringify(data, null, 2));
-      }
-    });
-  });
-
   // execute this code
-  auth0WebAuth.parseHash(window.location.hash, function (err, result) {
-    if (result) {
-      saveAuthResult(result);
-    }
-  });
+  var result = auth0.parseHash(window.location.hash);
+  if (result && result.accessToken) {
+    saveAuthResult(result);
+  } else if (result && result.error) {
+    alert('error: ' + result.error);
+  }
   // kick off display status
   displayStatus();
 });

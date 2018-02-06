@@ -3,15 +3,12 @@
     <meta charset="utf-8">
     <title>Single Page Application</title>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="https://cdn.auth0.com/js/auth0/8.12.2/auth0.min.js"></script>
+    <script src="//cdn.auth0.com/w2/auth0-7.6.1.js"></script>
     <script src="/javascript/auth0-variables.js"></script>
     <script src="/javascript/index.js"></script>
   </head>
   <body>
     <ul id="login" style="display:none">
-      <li>
-        <a id="authenticate-centralised" href="#">Universal Sign in</a>
-      </li>
       <li>
         <a id="authenticate-embedded-customui" href="#">Embedded Custom UI Sign in</a>
       </li>
@@ -42,11 +39,7 @@
       <p id="status"></p>
     </div>
     <div id="app" style="display:none;">
-      <button id="get-profile">Get Profile JS</button>
       <button id="get-profile-authentication-userinfo">Get Profile Auth</button>
-      <button id="get-profile-managementapi">Get Profile Mgmt API</button>
-      <button id="get-contacts">List Contacts</button>
-      <button id="get-appointments">List Appointments</button>
       <div id="results"><pre></pre></div>
     </div>
 

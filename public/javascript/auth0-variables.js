@@ -8,16 +8,12 @@ const AUTH0_CONNECTION = 'Username-Password-Authentication';
 const CONTACTS_API_PORT = '3001';
 const CALENDAR_API_PORT = '3002';
 
-const auth0WebAuth = new auth0.WebAuth({
+const auth0 = new Auth0({
   domain: AUTH0_DOMAIN,
   clientID: AUTH0_CLIENT_ID,
-  redirectUri: AUTH0_CALLBACK_URL,
-  responseType: 'id_token token',
+  callbackURL: AUTH0_CALLBACK_URL,
+  // responseType: 'id_token token',
+  responseType: 'token',
   audience: AUDIENCE,
   scope: SCOPE
-});
-
-const auth0Authentication = new auth0.Authentication({
-  domain: AUTH0_DOMAIN,
-  clientID: AUTH0_CLIENT_ID
 });
