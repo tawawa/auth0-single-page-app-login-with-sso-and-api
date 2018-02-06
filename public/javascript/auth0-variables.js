@@ -17,7 +17,7 @@ const auth0WebAuth = new auth0.WebAuth({
   scope: SCOPE
 });
 
-const auth0Authentication = new auth0.Authentication(auth0WebAuth, {
+const auth0Authentication = new auth0.Authentication({
   domain: AUTH0_DOMAIN,
   clientID: AUTH0_CLIENT_ID
 });
