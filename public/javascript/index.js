@@ -75,6 +75,7 @@ $(function () {
         sso: true,
         scope: SCOPE
       }, function (err) {
+        console.log(JSON.stringify(err));
         // this only gets called if there was a login error
         console.error('Portal LoginController Error: ' + err);
       });
@@ -84,7 +85,7 @@ $(function () {
   $('#sso-logout').click(function (e) {
     e.preventDefault();
     localStorage.clear();
-    auth0WebAuth.logout({ returnTo: 'http://app1.com:3000' });
+    auth0WebAuth.logout({ returnTo: 'http://app1.demonstration.site:3000' });
   });
 
   $('#local-logout').click(function (e) {
@@ -120,7 +121,8 @@ $(function () {
   $('#get-profile-managementapi').on('click', function (e) {
     e.preventDefault();
     auth0WebAuth.checkSession({
-      audience: `https://${AUTH0_DOMAIN}/api/v2/`,
+      // audience: `https://${AUTH0_DOMAIN}/api/v2/`,
+      audience: `https://demonstration.auth0.com/api/v2/`,
       scope: 'read:current_user'
     },
           function (err, result) {

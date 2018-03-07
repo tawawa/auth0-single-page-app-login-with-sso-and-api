@@ -1,0 +1,8 @@
+{
+  "original": {
+    "error": "access_denied",
+    "error_description": "Wrong email or password."
+  },
+  "code": "access_denied",
+  "description": "Wrong email or password."
+}
