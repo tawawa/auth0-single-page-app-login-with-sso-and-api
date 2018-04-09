@@ -1,6 +1,6 @@
 
 const AUTH0_CLIENT_ID = 'zalZ1MTxYGmq72QYJ3fhsMl13Z5xfZga';
-const AUTH0_DOMAIN = 'auth.demonstration.site';
+const AUTH0_DOMAIN = 'demonstration.auth0.com';
 const AUDIENCE = 'organise';
 const SCOPE = 'openid profile email read:contacts read:calendar';
 const AUTH0_CALLBACK_URL = 'http://app1.demonstration.site:3000';
@@ -14,7 +14,8 @@ const auth0WebAuth = new auth0.WebAuth({
   redirectUri: AUTH0_CALLBACK_URL,
   responseType: 'id_token token',
   audience: AUDIENCE,
-  scope: SCOPE
+  scope: SCOPE,
+  _disableDeprecationWarnings: true
 });
 
 const auth0Authentication = new auth0.Authentication(auth0WebAuth, {

@@ -38,8 +38,11 @@ function saveAuthResult (result) {
 
 function checkSession () {
   auth0WebAuth.checkSession({
+    // add rememberMe
     responseType: 'token id_token',
     timeout: 5000,
+    // add rememberMe
+    rememberMe: true,
     usePostMessage: true
   }, function (err, result) {
     if (err) {
@@ -48,6 +51,9 @@ function checkSession () {
       $('#logout').hide();
       $('#login').show();
     } else {
+      console.log(result);
+      var rememberMe = result.idTokenPayload['https://myapp.example.com/rememberMe'];
+      console.log("Remember Me: :" + rememberMe);
       saveAuthResult(result);
     }
   });
@@ -58,7 +64,7 @@ $(function () {
     e.preventDefault();
     $('#embedded-login-customui').hide();
     $('#app').hide();
-    auth0WebAuth.authorize();
+    auth0WebAuth.authorize({rememberMe: true});
   });
 
   $('#authenticate-embedded-customui').on('click', function (e) {
@@ -72,6 +78,7 @@ $(function () {
         username: $('#email').val(),
         password: $('#password').val(),
         redirectUri: AUTH0_CALLBACK_URL,
+        rememberMe: true,
         sso: true,
         scope: SCOPE
       }, function (err) {
